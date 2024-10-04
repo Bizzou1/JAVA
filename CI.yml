@@ -1,0 +1,57 @@
+name: Java CI
+
+on:
+  push:
+    branches:
+      - main  # Change this to your default branch if needed
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: yourpassword
+          POSTGRES_DB: yourdatabase
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'  # Specify your Java version
+
+      - name: Install Maven
+        run: mvn install
+
+      - name: Compile the project
+        run: mvn compile
+
+      - name: Run tests
+        run: mvn test
+
+      - name: Package the application
+        run: mvn package
+
+      - name: Run application
+        run: java -cp "target/yourproject.jar:/workspace/src/main/java/lib/postgresql-42.2.20.jar" com.example.healthapp.HealthApp
+
+      - name: Check database entries
+        run: |
+          echo "Checking database entries..."
+          # You can add commands to verify that data was stored correctly in your database here
+
