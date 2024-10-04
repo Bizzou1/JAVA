@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  vscode:
+    build: .
+    container_name: vscode-java
+    volumes:
+      - .:/workspace
+    ports:
+      - "8443:8443"
+    environment:
+      - PASSWORD=yourpassword
+    networks:
+      - dev-network
+
+  postgres:
+    image: postgres:15
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: yourpassword
+      POSTGRES_DB: yourdatabase
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - dev-network
+    ports:
+      - "5432:5432"
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: leo@pgadmin.com
+      PGADMIN_DEFAULT_PASSWORD: password1
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - dev-network
+
+networks:
+  dev-network:
+    driver: bridge
+
+volumes:
+  pgdata:
+  pgadmin-data:
